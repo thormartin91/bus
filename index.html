@@ -1,0 +1,46 @@
+<html>
+	<head>
+		<meta http-equiv="refresh" content="60"> <!-- update every minute -->
+		
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment-with-locales.js"></script>
+
+		<link href='http://fonts.googleapis.com/css?family=Raleway:100' rel='stylesheet' type='text/css'>
+
+		<style type="text/css">
+			h1,h3,p { 
+				font-family: 'Raleway', sans-serif; 
+				font-weight: 100; 
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="bus"></div>
+	</body>
+
+	<script type="text/javascript">
+	// request
+	function httpGet(url) {
+		var xmlHttp = null;
+		xmlHttp = new XMLHttpRequest();
+		xmlHttp.open( "GET", url, false );
+		xmlHttp.send( null );
+		return xmlHttp.responseText;
+	}
+	// set language
+	moment.locale('nb');
+	
+	// get time to bus
+	var object = httpGet('http://bybussen.api.tmn.io/rt/16011394');
+	var next = moment(JSON.parse(object).next[0].ts, "DD.MM.YYYY HH:mm");
+	var timeToBus = moment(next).fromNow();
+	var timeOfBus = moment(next).format(" (HH:mm)");
+
+	// add to html
+	var divBus = document.querySelector('.bus');
+	var nextBus = document.createElement('h1');
+	nextBus.textContent = timeToBus + timeOfBus;
+	divBus.appendChild(nextBus);
+	</script>
+
+</html>
