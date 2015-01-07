@@ -1,7 +1,5 @@
 <html>
 	<head>
-		<meta http-equiv="refresh" content="60"> <!-- update every minute -->
-		
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment-with-locales.js"></script>
 
 		<link href='http://fonts.googleapis.com/css?family=Raleway:100' rel='stylesheet' type='text/css'>
@@ -19,28 +17,61 @@
 	</body>
 
 	<script type="text/javascript">
+	// set language
+	moment.locale('nb');
+
 	// request
 	function httpGet(url) {
+		console.log("httpGet()");
 		var xmlHttp = null;
 		xmlHttp = new XMLHttpRequest();
 		xmlHttp.open( "GET", url, false );
 		xmlHttp.send( null );
 		return xmlHttp.responseText;
 	}
-	// set language
-	moment.locale('nb');
-	
+
 	// get time to bus
-	var object = httpGet('http://bybussen.api.tmn.io/rt/16011394');
-	var next = moment(JSON.parse(object).next[0].ts, "DD.MM.YYYY HH:mm");
+	function setTimes(){
+		console.log("setTimes()");
+		var object = httpGet('http://bybussen.api.tmn.io/rt/16011394');
+		var nextBus = moment(JSON.parse(object).next[0].t, "DD.MM.YYYY HH:mm");
+		return nextBus
+	}
+
+	// variables
+	var next = setTimes();
 	var timeToBus = moment(next).fromNow();
 	var timeOfBus = moment(next).format(" (HH:mm)");
 
-	// add to html
-	var divBus = document.querySelector('.bus');
-	var nextBus = document.createElement('h1');
-	nextBus.textContent = timeToBus + timeOfBus;
-	divBus.appendChild(nextBus);
+	update();
+
+	// update/add to html
+	function update(){
+		console.log("update()");
+		var divBus = document.querySelector('.bus');
+		if(divBus.hasChildNodes()){
+			divBus.removeChild(divBus.lastChild);
+		}
+		var time = document.createElement('h1');	
+		time.textContent = timeToBus + timeOfBus;
+		divBus.appendChild(time);
+	}
+
+	// check times
+	setInterval(function calculate(){
+		console.log("calculate()");
+		if(timeToBus != moment(next).fromNow()){
+			timeToBus = moment(next).fromNow();
+			update();
+		}
+		if(moment().isAfter(next)){
+			// request new bus times
+			next = setTimes();
+			timeOfBus = moment(next).format(" (HH:mm)");
+			update();
+		}
+	}, 3000);
+
 	</script>
 
 </html>
